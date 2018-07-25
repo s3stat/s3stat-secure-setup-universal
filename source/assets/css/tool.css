@@ -1,0 +1,277 @@
+﻿html, body
+{
+	width: 100%;
+	height: 100%;
+}
+
+body
+{
+	border-radius: 0;
+	border: solid 1px rgb(27, 161, 226);
+	background: #fff linear-gradient(to bottom, rgba(27, 161, 226, 0.1),rgba(27, 161, 226, 0.01) 10%, rgba(27, 161, 226, 0) );
+}
+
+.material-nav
+{
+	position: relative;
+	width: 100%;
+	height: 50px;
+	-webkit-app-region: drag;
+}
+.container, .breadcrumb
+{
+	min-width:600px;
+}
+
+
+.window-buttons
+{
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	width: 120px;
+	height: 20px;
+	z-index: 100;
+	-webkit-app-region: no-drag;
+}
+
+.window-buttons > a.icon
+{
+	float: right;
+	margin-left: 10px;
+	font-size: 16px;
+	color: rgba(0,0,0,0.6);
+}
+
+.material-nav img.logo
+{
+	height: 37px;
+	width: 37px;
+	position: absolute;
+	top: 0;
+	right: 110px;
+	border-radius: 0;
+}
+
+.material-nav .title-text
+{
+	position: absolute;
+	top: 90px;
+	left: 0;
+	background: rgb(27, 161, 226);
+	color: #fff;
+	padding: 0px 10px;
+	transform: rotate(270deg);
+	transform-origin: top left;
+	font-size: 12px;
+	line-height: 16px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#content
+{
+	padding: 0px 20px;
+}
+
+.breadcrumb
+{
+	padding-left: 50px;
+	background: transparent;
+	font-size: 14px;
+	margin-bottom: 30px;
+	margin-top: -10px;
+}
+
+.breadcrumb-item + .breadcrumb-item::before
+{
+	content: "";
+}
+
+.breadcrumb-item
+{
+	padding: 0px 0.4rem;
+	text-transform: uppercase;
+}
+
+.breadcrumb-item.active > a
+{
+	color: #818a91;
+}
+
+.row.form
+{
+	margin-top: 12px;
+}
+
+textarea.policy
+{
+	height:100px;
+	padding:0 5px;
+	font-size:8pt;
+	font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.spinner-green-only.spinner-white-only
+{
+	border-color:#fff;
+}
+
+.card-block
+{
+	padding: 0.75rem 1.25rem;
+}
+
+.card-block h3
+{
+	margin-bottom: 0;
+	font-size: 1.5rem;
+	text-overflow: ellipsis;
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.card-block .tag
+{
+	margin-right: 5px;
+}
+
+.endpoint
+{
+	border: solid 3px transparent;
+	background: #fff;
+}
+
+.endpoint.s3stat
+{
+	background: rgba(92, 184, 92, 0.2);
+}
+
+.endpoint:hover
+{
+	background: rgba(27, 161, 226, 0.05);
+	cursor: pointer;
+}
+
+.endpoint.s3stat:hover
+{
+	background: rgba(92, 184, 92, 0.3);
+}
+
+.endpoint.pattern
+{
+	display: none;
+}
+
+.endpoint.selected
+{
+	border: solid 3px rgba(27, 161, 226, 1);
+	background: rgba(27, 161, 226, 0.05);
+}
+
+.endpoint.selected:hover
+{
+	background: rgba(27, 161, 226, 0.1);
+}
+
+.endpointpanel
+{
+	display: none;
+}
+
+.endpointpanel.active
+{
+	display: block;
+}
+
+.select-wrapper + label.active
+{
+	top: 0.8rem;
+}
+
+#configure
+{
+	margin-top: 20px;
+}
+
+.list-spinner
+{
+	position: relative;
+	width: 40px;
+	height: 40px;
+	margin: 20px auto;
+}
+
+.loading-spinner
+{
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	right: 1.25rem;
+	top: 0.75rem;
+}
+
+.spinner
+{
+}
+
+.double-bounce1, .double-bounce2
+{
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background-color: rgba(27, 161, 226, 0.3);
+	opacity: 0.6;
+	position: absolute;
+	top: 0;
+	left: 0;
+	-webkit-animation: sk-bounce 2.0s infinite ease-in-out;
+	animation: sk-bounce 2.0s infinite ease-in-out;
+}
+
+.double-bounce2
+{
+	-webkit-animation-delay: -1.0s;
+	animation-delay: -1.0s;
+}
+
+@-webkit-keyframes sk-bounce
+{
+	0%, 100%
+	{
+		-webkit-transform: scale(0.0);
+	}
+
+	50%
+	{
+		-webkit-transform: scale(1.0);
+	}
+}
+
+@keyframes sk-bounce
+{
+	0%, 100%
+	{
+		transform: scale(0.0);
+		-webkit-transform: scale(0.0);
+	}
+
+	50%
+	{
+		transform: scale(1.0);
+		-webkit-transform: scale(1.0);
+	}
+}
+
+@media (max-width: 979px)
+{
+	.card-block
+	{
+		padding: 0.75rem;
+	}
+
+	.loading-spinner
+	{
+		right: 0.75rem;
+		top: 0.75rem;
+	}
+}

@@ -1,0 +1,110 @@
+﻿<div class="row">
+	<div class="col-sm-6" id="list" style="height:75vh;overflow:auto;">
+		<div class="spinner list-spinner">
+			<div class="double-bounce1"></div>
+			<div class="double-bounce2"></div>
+		</div>
+		<div class="endpoint card pattern">
+			<div class="card-block">
+				<div class="loading-spinner spinner">
+					<div class="double-bounce1"></div>
+					<div class="double-bounce2"></div>
+				</div>
+				<h3 class="card-title endpoint-title"></h3>
+				<h6 class="card-title endpoint-subtitle"></h6>
+				<div class="tags"></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-1"></div>
+	<div class="col-sm-5" id="detail">
+		<div id="intro" class="endpointpanel active row">
+			<h3>
+				Endpoint Setup
+			</h3>
+			<p>
+				Click on an endpoint in the list to set it up for S3<small>STAT</small> reporting.
+			</p>
+		</div>
+		<div id="success" class="endpointpanel row">
+			<h3>
+				Success
+			</h3>
+			<p>
+				Click on another endpoint in the list to set it up for S3<small>STAT</small> reporting.
+			</p>
+		</div>
+		<div id="endpoint_reporting" class="endpointpanel row">
+			<h3 id="endpointtitle">
+				Reporting
+			</h3>
+			<p>
+				<span id="endpoint_logyes_reportno" class="endpointpanel">
+					This endpoint is already set up for logging. All we need to do is tell S3stat to start running reports.
+				</span>
+				<span id="endpoint_logno_reportno" class="endpointpanel">
+					This endpoint is not yet set up for logging. We've suggested some defaults for log delivery, but feel free to change them. When you click the big button below, we'll start logging and tell S3stat to start running reports.
+				</span>
+				<span id="endpoint_logno_reportyes" class="endpointpanel">
+					This endpoint is already registered with S3stat, but it needs some fixing. When you click the big button below, we'll ensure that logging is set up correctly.
+				</span>
+				<span id="endpoint_logyes_reportyes" class="endpointpanel">
+					This endpoint is already registered with S3stat for reporting, and everything seems to be set up correctly.
+				</span>
+			</p>
+		</div>
+		<div id="pending" class="endpointpanel">
+			<div class="spinner list-spinner">
+				<div class="double-bounce1"></div>
+				<div class="double-bounce2"></div>
+			</div>
+		</div>
+
+		<div id="configure" class="endpointpanel">
+
+			<div class="form row">
+				<div class="md-form col-md-12">
+					<select class="mdb-select" id="logBucket" name="logBucket">
+						<option></option>
+					</select>
+					<label for="logBucket" class="">Log Bucket</label>
+				</div>
+
+
+				<div class="md-form col-md-12">
+					<input type="text" class="form-control" id="logPrefix" name="logPrefix">
+					<label for="logPrefix" class="">Log Path</label>
+				</div>
+				<div class="md-form col-md-12">
+					<button class="btn btn-primary" onclick="EndpointDetail.configure() ">Configure & Save</button>
+				</div>
+
+
+			</div>
+		</div>
+
+		<div id="disable" class="endpointpanel" style="margin-top: 1.5rem;">
+
+			<div class="form row">
+				<div class="md-form col-md-12">
+					<button class="btn btn-primary" onclick="EndpointDetail.stopReporting() ">Stop Reporting</button>
+				</div>
+				<div class="md-form col-md-12" style="height:67px;">
+					<input type="checkbox" id="stopLogging" name="stopLogging">
+					<label for="stopLogging"><small>Also stop logging (not recommended)</small></label>
+				</div>
+
+
+			</div>
+		</div>
+
+	</div>
+</div>
+
+
+<script>
+	$("#configure select").material_select();
+
+	EndpointList.pattern = $(".endpoint.pattern").clone().removeClass("pattern");
+	EndpointList.populate();
+</script>

@@ -1,0 +1,72 @@
+﻿<div class="row">
+	<div class="col-sm-5 col-xs-12">
+		<div class="form row">
+			<div class="md-form col-md-12">
+				<input type="text" class="form-control" id="username" name="username">
+				<label for="username" class="">Username</label>
+			</div>
+			<div class="md-form col-md-12">
+				<input type="password" class="form-control" id="password" name="password">
+				<label for="password" class="">Password</label>
+			</div>
+			<div class="md-form col-md-12" style="height:67px;">
+				<input type="checkbox" id="remember" name="remember">
+				<label for="remember">Remember this</label>
+			</div>
+
+
+			<div class="md-form col-md-12">
+				<button class="btn btn-primary" onclick=" login() ">Continue</button>
+			</div>
+
+
+
+		</div>
+	</div>
+	<div class="col-sm-2"></div>
+	<div class="col-sm-5">
+		<h3>S3<small>STAT</small> login
+		</h3>
+		<p>
+			First we need to login to your S3<small>STAT</small> account.
+			If you don't yet have an account, go ahead and follow this link to
+			<a href="https://www.s3stat.com/Setup/Register.aspx" onclick="return tool.load(this, true);">create a new S3<small>STAT</small> account</a>.
+		</p>
+		<p>
+			We'll wait for you here.
+		</p>
+	</div>
+</div>
+
+<script>
+	
+	var login = function()
+	{
+		AppState.UserName = $("#username").val();
+		AppState.Password = $("#password").val();
+		AppState.RememberS3statLogin = $("#remember")[0].checked;
+		AppState.save();
+
+		S3stat.login(function(err, data)
+		{
+			if (err)
+			{
+				tool.error("Couldn't find an S3stat account with this username and password", "Login Failed");
+				return;
+			}
+
+			tool.load("credentials.html");
+		});
+
+	}
+
+	if (AppState.RememberS3statLogin)
+	{
+		$("#username").val(AppState.UserName);
+		$("#password").val(AppState.Password);
+		$("#remember")[0].checked = AppState.RememberS3statLogin;
+		$("label[for=username]").addClass("active");
+		$("label[for=password]").addClass("active");
+	}
+
+</script>

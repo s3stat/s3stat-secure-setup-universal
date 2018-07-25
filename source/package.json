@@ -1,0 +1,11 @@
+﻿{
+	"name": "s3stat-setup",
+	"version": "2.1.8",
+	"main": "main.js",
+	"dependencies": {
+		"aws-sdk": "2.6.9",
+		"electron-json-storage": "2.0.3",
+		"ipc": "0.0.1",
+		"shell": "0.3.2"
+	}
+}

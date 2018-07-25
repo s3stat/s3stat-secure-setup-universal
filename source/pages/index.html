@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>S3stat Secure Setup</title>
+
+	<!--
+
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+	-->
+	<!--<link href="../assets/css/toolkit-startup.css" rel="stylesheet">-->
+	<link href="../assets/css/startup-selected.css" rel="stylesheet">
+	<link href="../assets/css/bootstrap.css" rel="stylesheet">
+	<link href="../assets/css/mdb.css" rel="stylesheet">
+	<link href="../assets/css/tool.css" rel="stylesheet">
+</head>
+<body>
+	<div class="material-nav">
+		<div class="window-buttons">
+			<a id="btn-close" class="icon icon-cross" onclick=" ipc.send('btn-close'); "></a>
+			<a id="btn-maximize" class="icon icon-resize-full-screen" onclick=" ipc.send('btn-maximize'); "></a>
+			<a id="btn-unmaximize" class="icon icon-resize-100" onclick=" ipc.send('btn-unmaximize'); " style="display: none;"></a>
+			<a id="btn-minimize" class="icon icon-chevron-down" onclick=" ipc.send('btn-minimize'); "></a>
+		</div>
+
+		<img src="../assets/img/s3stat_spark_white.ico" class="logo" />
+		<div class="title-text">
+			S3<small>STAT</small>
+		</div>
+	</div>
+	<ol class="breadcrumb">
+		<li class="breadcrumb-item active"><a href="home.html" onclick="return tool.load(this, false);">Home</a></li>
+		<li class="breadcrumb-item"><a href="login.html" onclick="return tool.load(this, false);">S3stat</a></li>
+		<li class="breadcrumb-item"><a href="credentials.html" onclick="return tool.load(this, false);">AWS</a></li>
+		<li class="breadcrumb-item"><a href="role.html" onclick="return tool.load(this, false);">Role</a></li>
+		<li class="breadcrumb-item"><a href="endpoints.html" onclick="return tool.load(this, false);">Endpoints</a></li>
+		<li class="breadcrumb-item"><a href="finished.html" onclick="return tool.load(this, false);">Finished</a></li>
+	</ol>
+	<div id="content" class="container">
+		<h1>
+			S3<small>STAT</small> Secure Setup
+		</h1>
+		<p>
+			This tool will walk you through the process of setting up logging for your S3 and Cloudfront endpoints, as well as a the necessary permissions to allow S3stat to download and process those logs.
+		</p>
+		<a id="continue" href="login.html" onclick=" return tool.load(this, false); " class="btn btn-large btn-primary disabled">Continue</a>
+	</div>
+	<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorTitle" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="errorTitle"></h4>
+				</div>
+				<div class="modal-body">
+					<p>
+						<code class="error-text"></code>
+					</p>
+					<p>
+						<span class="message-text"></span>
+					</p>
+					<p>
+						<a href="#" class="fix-link" onclick="return tool.load(this, true);">How to fix this</a>
+					</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+<script>
+
+	if (typeof module === 'object')
+	{
+		window.module = module;
+		module = undefined;
+	}
+</script>
+<script src="../assets/js/jquery.min.js"></script>
+<script src="../assets/js/tether.js"></script>
+<script src="../assets/js/bootstrap.js"></script>
+<script src="../assets/js/mdb.js"></script>
+<script> if (window.module) module = window.module; </script>
+<!--	<script src="../assets/js/toolkit.js"></script>-->
+<script src="../tool/tool.js"></script>
+<script src="../tool/appstate.js"></script>
+<script src="../tool/s3stat.js"></script>
+<script src="../tool/awshelper.js"></script>
+<script src="../tool/role.js"></script>
+<script src="../tool/endpoint.js"></script>
+<script src="../tool/endpointlist.js"></script>
+<script src="../tool/endpointdetail.js"></script>
+
+<script>
+
+	$("#continue").addClass("disabled");
+	AppState.load(function()
+	{
+		$("#continue").removeClass("disabled");
+	});
+</script>

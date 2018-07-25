@@ -1,0 +1,71 @@
+﻿<div class="row">
+	<div class="col-sm-6 col-xs-12">
+		<div class="form row">
+			<div class="md-form col-md-12">
+				<input type="checkbox" id="grant" name="grant" onclick="Role.updateGrant();">
+				<label for="grant" id="grantlabel">Grant read-only access</label>
+			</div>
+
+
+			<div class="md-form col-md-12">
+				<button id="continue" class="btn btn-primary" disabled="disabled" onclick=" Role.createRole() ">Continue</button>
+			</div>
+
+			<div class="md-form col-md-12">
+				<a href="#" onclick="Role.showPolicy(this);return false;">View IAM Policy contents</a>
+			</div>
+
+			<div id="policycontent" class="collapse">
+				<div class="md-form col-md-12">
+					<textarea class="form-control policy" id="assumeRolePolicy" name="assumeRolePolicy"></textarea>
+					<label for="assumeRolePolicy" class="active">Assume Role Policy</label>
+				</div>
+				<div class="md-form col-md-12">
+					<textarea class="form-control policy" id="accessPolicy" name="accessPolicy"></textarea>
+					<label for="accessPolicy" class="active">Access Policy</label>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<div class="col-sm-1"></div>
+	<div class="col-sm-5">
+		<h3>
+			IAM Role
+		</h3>
+		<p>
+			S3stat needs to set up an IAM Role for your AWS Account that will allow us to read your logfiles.
+
+		</p>
+		<p>
+			An
+			<a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/WorkingWithRoles.html" onclick="return tool.load(this, true);">IAM Role</a>
+			can be used to grant a given AWS user access to a restricted set of permissions on your account. 
+			In this case, we'll be granting the S3stat LogReader user read-only access to S3.
+		</p>
+		<p>
+			After this step is complete, you'll find a new Role named "S3statLogReaders" attached to your account.
+			You can delete it at any time, and S3stat will simply cease reporting.
+		</p>
+	</div>
+</div>
+
+<script>
+	Role.populate();
+
+	var b = {
+		"Version": "2012-10-17",
+		"Statement": [
+			{
+				"Sid": "",
+				"Effect": "Allow",
+				"Principal": { "AWS": "S3STAT_USER_ARN" },
+				"Action": "sts:AssumeRole",
+				"Condition": { "StringEquals": { "sts:ExternalId": "S3STAT_ROLE_EXTERNAL_ID" } }
+			}
+		]
+	};
+
+//	console.log(JSON.stringify(b, null, "\t"));
+//	console.log(a == JSON.stringify(b, null, "\t"));
+</script>
