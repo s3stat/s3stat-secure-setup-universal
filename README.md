@@ -3,7 +3,7 @@
 
 This is a tool to configure Cloudfront and Amazon S3 endpoints for logging and reporting with [S3stat].
 
-For more information about the tool, visit the [Download] page.
+For more information about the tool, visit the [Download] page.  There is also a [Windows Version] of this tool.
 
 
 ## Building and Running
@@ -28,3 +28,4 @@ Enjoy!
 [Install Electron]: https://electronjs.org/docs/tutorial/installation
 [NPM]: https://www.npmjs.com/
 [Node.js]: https://nodejs.org/
+[Windows Version]: https://github.com/s3stat/s3stat-secure-setup
