@@ -1,0 +1,245 @@
+﻿<style>
+	.icon-check
+	{
+		color:green;
+	}
+	.icon-cross
+	{
+		color:red;
+	}
+	.configError
+	{
+		font-size: 70%;
+		color: #f00;
+		white-space: normal;
+	}
+
+
+</style>
+<div class="row">
+	<div class="col-sm-5 col-xs-12" style="height:75vh;">
+		<ul id="permissionList" style="height:60vh;overflow:auto;white-space:nowrap;">
+		</ul>
+
+		<div class="form row">
+			<div class="md-form col-md-12">
+				<button id="continueButton" class="btn btn-primary" onclick="continueClick()" style="display:;">Continue</button>
+				<button id="backButton" class="btn btn-primary" onclick="backClick()" style="display:none;">Back</button>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-2"></div>
+	<div class="col-sm-5" style="height:75vh;overflow:auto;">
+		<h3>
+			Detecting AWS Permissions
+		</h3>
+		<p>
+			We're now checking to make sure we have all the READ permissions we need to get you set up
+			and eventually read your logfiles.
+			Some of these permissions will need to be passed on to the read-only IAM Role that we'll
+			be creating in the next step, and that can only happen if the credential set you're using
+			for this tool has those permissions too.
+		</p>
+		<p>
+			If you used 
+			<a href="https://www.s3stat.com/downloads/iam_role.txt" onclick=" return tool.load(this, true); ">
+				our supplied IAM Policy
+			</a>
+			in the previous step, this should all go smoothly.
+			If not, well, chances are you'll get to go back and do that step over again.
+		</p>
+		<p>
+			Note that we're not yet checking whether we have any MODIFY permissions.
+			If you've left those off, we'll learn about it in a few minutes when it comes time
+			to enable logging and give S3stat's AWS account permission to read those logs.
+		</p>
+	</div>
+</div>
+
+<script>
+	var permissions = [
+		"s3:ListAllMyBuckets",
+		"s3:ListBucket",
+		"s3:GetBucketAcl",
+		"s3:GetBucketLogging",
+		"s3:GetBucketLocation",
+		"s3:GetObject",
+		"cloudfront:ListDistributions",
+		"cloudfront:ListStreamingDistributions",
+		"cloudfront:GetDistribution",
+		"cloudfront:GetDistributionConfig",
+		"cloudfront:GetStreamingDistribution",
+		"cloudfront:GetStreamingDistributionConfig",
+		"iam:GetUser",
+		"iam:GetRole",
+		"ec2:DescribeRegions",
+		"cloudwatch:GetMetricStatistics"];
+
+	var anyBad = false;
+
+	var actFailed = function()
+	{
+		$("#continueButton").hide();
+		$("#backButton").show();
+	}
+
+	var markResult = function(tag, expectedErrorMessage, isOptional)
+	{
+		return function(err, data)
+		{
+
+			var id = "i_" + tag.replace(":", "_");
+			var icon = document.getElementById(id);
+			if (err && err.name != expectedErrorMessage)
+			{
+				if (isOptional)
+				{
+					icon.className = "icon icon-minus";
+					return true;
+				}
+				icon.className = "icon icon-cross";
+				console.log(err, $(icon));
+				anyBad = true;
+
+				$(icon).parent().append($("<div class='configError'>" + err + "</div>"));
+				actFailed();
+				return false;
+			}
+			icon.className = "icon icon-check";
+			
+			console.log(tag, data);
+			return true;
+		};
+	}
+
+
+
+	var markUnknown = function(tag)
+	{
+		var id = "i_" + tag.replace(":", "_");
+		var icon = document.getElementById(id);
+		icon.className = "icon icon-minus";
+	}
+
+	var populatePermissionList = function()
+	{
+		var list = $("#permissionList");
+		for (var i = 0; i < permissions.length; i++)
+		{
+			var tag = permissions[i];
+			var id = "i_" + tag.replace(":", "_");
+			var li = $('<li><i id="' + id + '" class="icon icon-dot-single"></i>' + tag + '</li>');
+			list.append(li);
+		}
+	}
+
+	var markRemainingUnknown = function()
+	{
+	};
+
+	var populate = function()
+	{
+		if (!AppState.UserName || !AppState.Password)
+		{
+			tool.load("login.html");
+			return;
+		}
+
+		if (!AppState.AWSAccessKey || !AppState.AWSSecretKey || !AppState.AWSAccountID)
+		{
+			tool.load("credentials.html");
+			return;
+		}
+
+		populatePermissionList();
+
+		// S3 permission drilldown
+		AWSHelper.listBuckets(function(err, data)
+		{
+			if (!markResult("s3:ListAllMyBuckets")(err, data)) return;
+
+			if (data.Buckets.length == 0)
+			{
+				markUnknown("s3:GetBucketLocation");
+				markUnknown("s3:GetBucketLogging");
+				markUnknown("s3:GetBucketAcl");
+				markUnknown("s3:ListBucket");
+				markUnknown("s3:GetObject");
+				return;
+			}
+
+			var bucket = data.Buckets[0].Name;
+			AWSHelper.getBucketLocation(bucket, function (err, data)
+			{
+				if (!markResult("s3:GetBucketLocation")(err, data)) return;
+
+				var region = data.LocationConstraint || "us-east-1";
+				AWSHelper.getBucketLogging(bucket, markResult("s3:GetBucketLogging"));
+				AWSHelper.getBucketAcl(bucket, region, markResult("s3:GetBucketAcl"));
+				AWSHelper.listObjects(bucket, region, 1, markResult("s3:ListBucket"));
+				AWSHelper.headObject(bucket, region, "", markResult("s3:GetObject"));
+			});
+		});
+
+		// Cloudfront permissions
+		AWSHelper.listDistributions(function(err, data)
+		{
+			if (!markResult("cloudfront:ListDistributions")(err, data))
+			{
+				markRemainingUnknown();
+				return;
+			}
+
+			if (data.DistributionList.Items.length == 0)
+			{
+				markUnknown("cloudfront:GetDistribution");
+				markUnknown("cloudfront:GetDistributionConfig");
+				return;
+			}
+
+			var dist = data.DistributionList.Items[0];
+			AWSHelper.getDistribution(dist.Id, markResult("cloudfront:GetDistribution"));
+			AWSHelper.getDistributionConfig(dist.Id, markResult("cloudfront:GetDistributionConfig"));
+		});
+
+		AWSHelper.listStreamingDistributions(function(err, data)
+		{
+			if (!markResult("cloudfront:ListStreamingDistributions")(err, data))
+			{
+				markRemainingUnknown();
+				return;
+			}
+
+			if (data.StreamingDistributionList.Items.length == 0)
+			{
+				markUnknown("cloudfront:GetStreamingDistribution");
+				markUnknown("cloudfront:GetStreamingDistributionConfig");
+				return;
+			}
+
+			var dist = data.StreamingDistributionList.Items[0];
+			AWSHelper.getDistribution(dist.Id, markResult("cloudfront:GetStreamingDistribution"));
+			AWSHelper.getDistributionConfig(dist.Id, markResult("cloudfront:GetStreamingDistributionConfig"));
+		});
+
+		AWSHelper.getUser("S3stat_ExpectFail", markResult("iam:GetUser", "NoSuchEntity"));
+		AWSHelper.getRole("S3stat_ExpectFail", markResult("iam:GetRole", "NoSuchEntity"));
+		AWSHelper.describeRegions(markResult("ec2:DescribeRegions", null, true));
+		AWSHelper.getMetricStatistics(markResult("cloudwatch:GetMetricStatistics", "MultipleValidationErrors", true));
+
+
+	}
+
+	var backClick = function()
+	{
+		tool.load("credentials.html");
+	}
+
+	var continueClick = function()
+	{
+		tool.load("role.html");
+	}
+
+
+	populate();
+</script>

@@ -92,6 +92,39 @@ AWSHelper.getBucketAcl = function(bucketName, region, callback)
 	});
 };
 
+AWSHelper.listObjects = function(bucketName, region, maxKeys, callback)
+{
+	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: region });
+	var s3 = new AWS.S3();
+
+	s3.listObjects({ Bucket: bucketName, MaxKeys: maxKeys }, function(err, data)
+	{
+		callback && callback(err, data);
+	});
+};
+
+AWSHelper.getObject = function(bucketName, region, key, callback)
+{
+	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: region });
+	var s3 = new AWS.S3();
+
+	s3.getObject({ Bucket: bucketName, Key: key }, function(err, data)
+	{
+		callback && callback(err, data);
+	});
+};
+
+AWSHelper.headObject = function(bucketName, region, key, callback)
+{
+	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: region });
+	var s3 = new AWS.S3();
+
+	s3.headObject({ Bucket: bucketName, Key: key }, function(err, data)
+	{
+		callback && callback(err, data);
+	});
+};
+
 AWSHelper.putBucketAcl = function(bucketName, policy, region, callback)
 {
 	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: region });
@@ -204,6 +237,17 @@ AWSHelper.listStreamingDistributions = function(callback)
 	});
 };
 
+AWSHelper.getDistribution = function(id, callback)
+{
+	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
+	var cf = new AWS.CloudFront();
+
+	cf.getDistribution({ "Id": id }, function(err, data)
+	{
+		callback && callback(err, data);
+	});
+};
+
 AWSHelper.getDistributionConfig = function(id, callback)
 {
 	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
@@ -274,6 +318,28 @@ AWSHelper.parseRegion = function(location)
 
 // IAM
 
+AWSHelper.getUser = function(userName, callback)
+{
+	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
+	var iam = new AWS.IAM();
+
+	iam.getUser({ "UserName": userName }, function(err, data)
+	{
+		callback && callback(err, data);
+	});
+};
+
+AWSHelper.getRole = function(roleName, callback)
+{
+	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
+	var iam = new AWS.IAM();
+
+	iam.getRole({ "RoleName": roleName }, function(err, data)
+	{
+		callback && callback(err, data);
+	});
+};
+
 AWSHelper.createRole = function(assumeRolePolicy, roleName, callback)
 {
 	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
@@ -295,3 +361,37 @@ AWSHelper.putRolePolicy = function(accessPolicy, roleName, callback)
 		callback && callback(err, data);
 	});
 };
+
+
+// Misc
+
+AWSHelper.describeRegions = function(callback)
+{
+	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
+	var ec2 = new AWS.EC2();
+
+	ec2.describeRegions({ }, function(err, data)
+	{
+		callback && callback(err, data);
+	});
+};
+
+AWSHelper.getMetricStatistics = function(callback)
+{
+	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
+	var cloudwatch = new AWS.CloudWatch();
+
+	cloudwatch.getMetricStatistics({
+		Namespace: "AWS/S3",
+		MetricName: "NumberOfObjects",
+		Dimensions: [],
+		StartTime: "2018-01-01T01:00:00+00:00",
+		EndTime: "2018-01-02T00:00:00+00:00",
+		Period: 3600,
+		Statistics: ["Average"]
+	}, function(err, data)
+	{
+		callback && callback(err, data);
+	});
+};
+

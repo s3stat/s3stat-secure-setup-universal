@@ -133,11 +133,11 @@ Role.createRole = function()
 		tool.toggleContinue(false);
 	}
 
-	if (AppState.Account.CanAssumeRole && AppState.Account.CanCloudWatch)
-	{
-		onward();
-		return;
-	}
+//	if (AppState.Account.CanAssumeRole && AppState.Account.CanCloudWatch)
+//	{
+//		onward();
+//		return;
+//	}
 
 	// Flow: createRole -> putRolePolicy -> setS3Account -> onward
 	AWSHelper.createRole(Role.getAssumeRolePolicyJson(), Role.LogReadersRoleName, function(err, data)

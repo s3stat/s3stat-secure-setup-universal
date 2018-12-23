@@ -11,8 +11,6 @@ tool.load = function(url, external)
 
 
 	var linkedHref = url.attributes ? url.attributes["href"].value : url;
-//	console.log(linkedHref);
-//	debugger;
 
 	if (url.href)
 	{
