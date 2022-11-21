@@ -1,6 +1,7 @@
-﻿var electron = require('electron'); // Module to control application life.
-var app = electron.app; // Module to create native browser window.
-var BrowserWindow = electron.BrowserWindow;
+﻿const { app, BrowserWindow } = require('electron');
+//var electron = require('electron'); // Module to control application life.
+//var app = electron.app; // Module to create native browser window.
+//var BrowserWindow = electron.BrowserWindow;
 var AWS = require('aws-sdk');
 var ipc = require('electron').ipcMain;
 var Menu = require('electron');
@@ -14,7 +15,16 @@ var mainWindow;
 function createWindow()
 {
 	// Create the browser window.
-	mainWindow = new BrowserWindow({ width: 800, height: 600, icon: 'file://' + __dirname + '/assets/img/s3stat_spark_white.ico', frame: false }); // and load the index.html of the app.
+	mainWindow = new BrowserWindow({
+		width: 800,
+		height: 600,
+		icon: 'file://' + __dirname + '/assets/img/s3stat_spark_white.ico',
+		frame: false,
+		webPreferences: {
+			nodeIntegration: true,
+			contextIsolation: false,
+			enableRemoteModule: true		}
+	}); // and load the index.html of the app.
 	mainWindow.loadURL('file://' + __dirname + '/pages/index.html'); // Open the DevTools.
 	//mainWindow.webContents.openDevTools(); // Emitted when the window is closed.
 	mainWindow.on('closed', function()
@@ -25,6 +35,8 @@ function createWindow()
 		mainWindow = null;
 		app.quit();
 	});
+
+	console.log("mainWindow", mainWindow)
 
 
 	mainWindow.on("maximize", function()

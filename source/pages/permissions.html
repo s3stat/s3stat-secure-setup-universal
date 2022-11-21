@@ -90,7 +90,7 @@
 
 			var id = "i_" + tag.replace(":", "_");
 			var icon = document.getElementById(id);
-			if (err && err.name != expectedErrorMessage)
+			if (err && err.name !== expectedErrorMessage)
 			{
 				if (isOptional)
 				{
@@ -177,7 +177,7 @@
 				AWSHelper.getBucketLogging(bucket, markResult("s3:GetBucketLogging"));
 				AWSHelper.getBucketAcl(bucket, region, markResult("s3:GetBucketAcl"));
 				AWSHelper.listObjects(bucket, region, 1, markResult("s3:ListBucket"));
-				AWSHelper.headObject(bucket, region, "", markResult("s3:GetObject"));
+				AWSHelper.headObject(bucket, region, "missingObject", markResult("s3:GetObject", "NotFound"));
 			});
 		});
 

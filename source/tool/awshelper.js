@@ -138,6 +138,12 @@ AWSHelper.putBucketAcl = function(bucketName, policy, region, callback)
 
 	s3.putBucketAcl({ Bucket: bucketName, AccessControlPolicy: policy }, function(err, data)
 	{
+		if (err)
+		{
+			// This won't work on new buckets.  No worries though, since those ones will have this ACL added by default.
+			console.warn("error in putBucketAcl", err);
+			err = null;
+		}
 		callback && callback(err, data);
 	});
 };
@@ -203,10 +209,10 @@ AWSHelper.fixS3Grants = function(grants)
 
 AWSHelper.buildLoggingConfig = function(logBucketName, logPrefix)
 {
+	// 20221121: buckets don't like target grants anymore.  Let's see what happens if we leave them out.
 	return {
 		"LoggingEnabled": {
 			"TargetBucket": logBucketName,
-			"TargetGrants": [{ "Grantee": { "Type": "Group", "URI": "http://acs.amazonaws.com/groups/global/AuthenticatedUsers" }, "Permission": "READ" }],
 			"TargetPrefix": logPrefix
 		}
 	};
