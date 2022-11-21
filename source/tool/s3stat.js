@@ -100,6 +100,34 @@ S3stat.deleteEndpoint = function(endpoint, callback)
 	});
 };
 
+
+S3stat.verifyRoleAccess = function(endpoint, callback)
+{
+	var url = S3stat.host + "/API/VerifyRoleAccess.aspx?username="
+		+ escape(AppState.UserName) + "&password=" + escape(AppState.Password);
+
+	var postData;
+	if (endpoint.IsS3)
+	{
+		postData = { "bucketid": endpoint.BucketID };
+	}
+	else
+	{
+		postData = { "distributionid": endpoint.DistributionID };
+	}
+
+	$.ajax({
+		type: "POST",
+		url: url,
+		data: postData,
+		complete: function(data)
+		{
+			console.log("verifyRoleAccess", data);
+			S3stat.callback(data, callback);
+		}
+	});
+};
+
 S3stat.noteException = function(msg, stack, context, handled, callback)
 {
 	var url = S3stat.host + "/API/NoteException.aspx?username="

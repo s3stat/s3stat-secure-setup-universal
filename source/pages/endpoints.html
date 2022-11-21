@@ -53,6 +53,20 @@
 				</span>
 			</p>
 		</div>
+		<div id="endpoint_logbucket" class="endpointpanel row">
+			<h3>
+				Logfile Bucket?
+			</h3>
+			<div id="endpoint_logbucket_instructions" class="endpointpanel">
+				<p>
+					The name of this Bucket suggests that it may exist only to hold logfiles.
+					If that's the case, <b>you don't want to set it up for reporing</b>.
+				</p>
+				<p>
+					Instead, go find the endpoint that's the source of these logs and set that up for reporting instead.
+				</p>
+			</div>
+		</div>
 		<div id="pending" class="endpointpanel">
 			<div class="spinner list-spinner">
 				<div class="double-bounce1"></div>
@@ -95,6 +109,19 @@
 				</div>
 
 
+			</div>
+		</div>
+
+		<div id="confirm_not_logging" class="endpointpanel" style="margin-top: 1.5rem;">
+
+			<div class="form row">
+				<div class="md-form col-md-12" style="height:67px;">
+					<input type="checkbox" id="notLogfiles" name="notLogfiles">
+					<label for="notLogfiles"><small>This is not a logfile bucket</small></label>
+				</div>
+				<div class="md-form col-md-12">
+					<button class="btn btn-primary" onclick="EndpointDetail.confirmNotLogging() ">Continue</button>
+				</div>
 			</div>
 		</div>
 

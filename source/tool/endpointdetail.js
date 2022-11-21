@@ -65,15 +65,36 @@ EndpointDetail.populate = function(endpoint)
 		EndpointDetail.disable();
 	}
 
-	var headerSelector = "#endpoint_log" + (endpoint.IsLogging ? "yes" : "no") + "_report" + (endpoint.IsS3stat ? "yes" : "no");
-	$("#endpoint_reporting").addClass("active");
-	$(headerSelector).addClass("active");
-
+	if (!endpoint.IsCloudfront && endpoint.BucketName.indexOf("log") > -1 && !endpoint.ConfirmedNotLogfiles)
+	{
+		// Try to stop people from setting their log buckets up for reporting.
+		$("#endpoint_logbucket").addClass("active");
+		$("#endpoint_logbucket_instructions").addClass("active");
+		$("#confirm_not_logging").addClass("active");
+		$("#configure").removeClass("active");
+		$("#disable").removeClass("active");
+	}
+	else
+	{
+		var headerSelector = "#endpoint_log" + (endpoint.IsLogging ? "yes" : "no") + "_report" + (endpoint.IsS3stat ? "yes" : "no");
+		$("#endpoint_reporting").addClass("active");
+		$(headerSelector).addClass("active");
+	}
 
 	logBucket.material_select('destroy');
 	logBucket.material_select();
 
 };
+
+EndpointDetail.confirmNotLogging = function()
+{
+	if ($("#notLogfiles")[0].checked)
+	{
+		var endpoint = EndpointDetail.currentEndpoint;
+		endpoint.ConfirmedNotLogfiles = true;
+		EndpointDetail.populate(endpoint);
+	}
+}
 
 EndpointDetail.reset = function(endpoint)
 {
@@ -122,6 +143,13 @@ EndpointDetail.configure = function()
 	endpoint.LogBucketName = $("#logBucket").val();
 	endpoint.LogPrefix = $("#logPrefix").val();
 
+	if (!endpoint.LogBucketName)
+	{
+		tool.error("You'll need to select a bucket for logging from the list",
+			"No logging bucket selected");
+		return;
+	}
+
 	AWSHelper.getBucketLocation(endpoint.LogBucketName, function(err, data)
 	{
 		if (err)
@@ -133,6 +161,23 @@ EndpointDetail.configure = function()
 		}
 
 		endpoint.LogRegion = AWSHelper.parseRegion(data.LocationConstraint);
+
+		var verifyCallback = function(err, data)
+		{
+			if (err)
+			{
+				EndpointDetail.currentEndpoint.IsS3stat = false;
+				tool.error("Bad news.  The read-only IAM Role we created earlier does not have permission to read from this endpoint's logging bucket. Fix this by going back to the Role step and trying again.", "Couldn't read using S3stat Role.", err, "VerifyRoleAccess");
+				EndpointDetail.update(EndpointDetail.currentEndpoint);
+				EndpointList.render();
+				return;
+			}
+
+			EndpointDetail.currentEndpoint.IsS3stat = true;
+			EndpointDetail.currentEndpoint = null;
+			EndpointList.render();
+
+		}
 
 		var saveCallback = function(err, data)
 		{
@@ -156,8 +201,10 @@ EndpointDetail.configure = function()
 				EndpointDetail.currentEndpoint.DistributionID = parseInt(data);
 			}
 			EndpointDetail.currentEndpoint.IsS3stat = true;
-			EndpointDetail.currentEndpoint = null;
-			EndpointList.render();
+			//EndpointDetail.currentEndpoint = null;
+			//EndpointList.render();
+
+			S3stat.verifyRoleAccess(EndpointDetail.currentEndpoint, verifyCallback);
 		}
 
 		var setLoggingCallback = function(err, data)
@@ -173,7 +220,7 @@ EndpointDetail.configure = function()
 			S3stat.setEndpoint(EndpointDetail.currentEndpoint.toJSON(), saveCallback);
 		}
 
-		// Flow: setLogging -> setLoggingCallback -> setEndpoint -> saveCallback
+		// Flow: setLogging -> setLoggingCallback -> setEndpoint -> saveCallback -> verifyCallback
 		// The Callbacks can short-circuit if necessary and return the form to a usable state.
 		if (endpoint.IsS3)
 		{
@@ -210,8 +257,8 @@ EndpointDetail.configure = function()
 				return;
 			}
 
-			endpoint.SourceLogRegion = AWSHelper.parseRegion(data.LocationConstraint);
-			AWSHelper.getBucketAcl(endpoint.BucketName, endpoint.SourceRegion, function(err, data)
+			endpoint.SourceRegion = AWSHelper.parseRegion(data.LocationConstraint);
+			AWSHelper.getBucketAcl(endpoint.LogBucketName, endpoint.LogRegion, function(err, data)
 			{
 				if (err)
 				{
@@ -221,7 +268,7 @@ EndpointDetail.configure = function()
 				}
 
 				AWSHelper.fixS3Grants(data.Grants);
-				AWSHelper.putBucketAcl(endpoint.BucketName, data, endpoint.SourceRegion, function(err, data)
+				AWSHelper.putBucketAcl(endpoint.LogBucketName, data, endpoint.LogRegion, function(err, data)
 				{
 					if (err)
 					{
@@ -320,7 +367,7 @@ EndpointDetail.stopLoggingS3 = function(callback)
 			return;
 		}
 
-		endpoint.SourceLogRegion = AWSHelper.parseRegion(data.LocationConstraint);
+		endpoint.SourceRegion = AWSHelper.parseRegion(data.LocationConstraint);
 		AWSHelper.stopBucketLogging(endpoint.BucketName, endpoint.SourceRegion, function(err, data)
 		{
 			if (err)

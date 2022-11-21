@@ -5,6 +5,7 @@ var AWS = require('aws-sdk');
 var ipc = require('electron').ipcMain;
 var Menu = require('electron');
 
+if (require('electron-squirrel-startup')) app.quit();
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

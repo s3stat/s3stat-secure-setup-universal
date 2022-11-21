@@ -1,11 +1,19 @@
 {
-	"name": "s3stat-setup",
-	"version": "2.2.1",
+	"id": "S3stat",
+	"name": "s3stat",
+	"title": "S3stat",
+	"version": "2.3.1",
+	"description": "S3stat Secure Setup Tool",
 	"main": "main.js",
 	"dependencies": {
 		"aws-sdk": "2.6.9",
 		"electron-json-storage": "2.0.3",
+		"electron-squirrel-startup": "^1.0.0",
 		"ipc": "0.0.1",
 		"shell": "0.3.2"
+	},
+	"devDependencies": {
+		"electron-winstaller": "^2.7.0",
+		"gulp": "^4.0.0"
 	}
 }

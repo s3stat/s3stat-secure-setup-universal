@@ -45,62 +45,68 @@ AWSHelper.getAccountIDFromARN = function(arn)
 };
 
 
-// S3
-
-AWSHelper.listBuckets = function(callback)
+var lastThrottledCall = new Date();
+AWSHelper.callThrottled = function(serviceConstructor, method, params, callback, region)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
-	var s3 = new AWS.S3();
-
-	s3.listBuckets({}, function(err, data)
+	if (new Date() - lastThrottledCall  < 100)
 	{
+		//console.log("throttling " + method, new Date() - lastThrottledCall);
+		setTimeout(function(){
+				AWSHelper.callThrottled(serviceConstructor, method, params, callback, region);
+		}, 100);
+		return;
+	}
+
+	//console.log("calling " + method, new Date() - lastThrottledCall);
+
+	lastThrottledCall = new Date();
+	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: region || 'us-east-1' });
+	var service = new serviceConstructor();
+
+	service[method](params, function(err, data)
+	{
+		console.log(method, data);
 		callback && callback(err, data);
 	});
 };
 
+// S3
+AWSHelper.listBuckets = function(callback)
+{
+	var params = { };
+	AWSHelper.callThrottled(AWS.S3, "listBuckets", params, callback, 'us-east-1');
+};
 
 AWSHelper.getBucketLocation = function(bucketName, callback)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
-	var s3 = new AWS.S3();
-
-	s3.getBucketLocation({ Bucket: bucketName }, function(err, data)
-	{
-		callback && callback(err, data);
-	});
+	var params = { Bucket: bucketName };
+	AWSHelper.callThrottled(AWS.S3, "getBucketLocation", params, callback, 'us-east-1');
 };
 
 AWSHelper.getBucketLogging = function(bucketName, callback)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
-	var s3 = new AWS.S3();
-
-	s3.getBucketLogging({ Bucket: bucketName }, function(err, data)
-	{
-		callback && callback(err, data);
-	});
+	var params = { Bucket: bucketName };
+	AWSHelper.callThrottled(AWS.S3, "getBucketLogging", params, callback, 'us-east-1');
 };
 
 AWSHelper.getBucketAcl = function(bucketName, region, callback)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: region });
-	var s3 = new AWS.S3();
-
-	s3.getBucketAcl({ Bucket: bucketName }, function(err, data)
-	{
-		callback && callback(err, data);
-	});
+	var params = { Bucket: bucketName };
+	AWSHelper.callThrottled(AWS.S3, "getBucketAcl", params, callback, region);
 };
 
 AWSHelper.listObjects = function(bucketName, region, maxKeys, callback)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: region });
-	var s3 = new AWS.S3();
+	var params = { Bucket: bucketName, MaxKeys: maxKeys };
+	AWSHelper.callThrottled(AWS.S3, "listObjects", params, callback, region);
 
-	s3.listObjects({ Bucket: bucketName, MaxKeys: maxKeys }, function(err, data)
-	{
-		callback && callback(err, data);
-	});
+//	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: region });
+//	var s3 = new AWS.S3();
+//
+//	s3.listObjects({ Bucket: bucketName, MaxKeys: maxKeys }, function(err, data)
+//	{
+//		callback && callback(err, data);
+//	});
 };
 
 AWSHelper.getObject = function(bucketName, region, key, callback)
@@ -168,7 +174,7 @@ AWSHelper.fixS3Grants = function(grants)
 		for (var i = 0; i < grants.length; i++)
 		{
 			var grant = grants[i];
-			if (grant.Grantee && grant.Grantee.URI == logUri && grant.Permission == permission)
+			if (grant.Grantee && grant.Grantee.URI === logUri && grant.Permission === permission)
 			{
 				return true;
 			}
@@ -217,57 +223,32 @@ AWSHelper.buildStopLoggingConfig = function(logBucketName, logPrefix)
 
 AWSHelper.listDistributions = function(callback)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
-	var cf = new AWS.CloudFront();
-
-	cf.listDistributions({}, function(err, data)
-	{
-		callback && callback(err, data);
-	});
+	var params = {};
+	AWSHelper.callThrottled(AWS.CloudFront, "listDistributions", params, callback, 'us-east-1');
 };
 
 AWSHelper.listStreamingDistributions = function(callback)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
-	var cf = new AWS.CloudFront();
-
-	cf.listStreamingDistributions({}, function(err, data)
-	{
-		callback && callback(err, data);
-	});
+	var params = { };
+	AWSHelper.callThrottled(AWS.CloudFront, "listStreamingDistributions", params, callback, 'us-east-1');
 };
 
 AWSHelper.getDistribution = function(id, callback)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
-	var cf = new AWS.CloudFront();
-
-	cf.getDistribution({ "Id": id }, function(err, data)
-	{
-		callback && callback(err, data);
-	});
+	var params = { "Id": id };
+	AWSHelper.callThrottled(AWS.CloudFront, "getDistribution", params, callback, 'us-east-1');
 };
 
 AWSHelper.getDistributionConfig = function(id, callback)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
-	var cf = new AWS.CloudFront();
-
-	cf.getDistributionConfig({ "Id": id }, function(err, data)
-	{
-		callback && callback(err, data);
-	});
+	var params = { "Id": id };
+	AWSHelper.callThrottled(AWS.CloudFront, "getDistributionConfig", params, callback, 'us-east-1');
 };
 
 AWSHelper.getStreamingDistributionConfig = function(id, callback)
 {
-	AWS.config.update({ "accessKeyId": AppState.AWSAccessKey, "secretAccessKey": AppState.AWSSecretKey, region: 'us-east-1' });
-	var cf = new AWS.CloudFront();
-
-	cf.getStreamingDistributionConfig({ "Id": id }, function(err, data)
-	{
-		callback && callback(err, data);
-	});
+	var params = { "Id": id };
+	AWSHelper.callThrottled(AWS.CloudFront, "getStreamingDistributionConfig", params, callback, 'us-east-1');
 };
 
 AWSHelper.updateDistribution = function(id, config, eTag, callback)
